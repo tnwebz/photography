@@ -33,7 +33,7 @@ export function ServicesSection() {
                   <img
                     src={meta.image}
                     alt={meta.title}
-                    className="h-full w-full object-cover grayscale transition duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
                 </div>
 
