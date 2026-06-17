@@ -8,9 +8,9 @@ import { useGallery } from '@/hooks/useGallery';
 import { CloudinaryUpload } from '@/components/CloudinaryUpload';
 
 const CATEGORIES: Array<{ key: GalleryCategory; label: string; image: string }> = [
-  { key: 'outdoor', label: 'Outdoor', image: '/p1.png' },
-  { key: 'candid', label: 'Candid', image: '/p2.png' },
-  { key: 'events', label: 'Events', image: '/p3.png' },
+  { key: 'outdoor', label: 'Outdoor', image: '/o1.png' },
+  { key: 'candid', label: 'Candid', image: '/c1.png' },
+  { key: 'events', label: 'Events', image: '/e1.png' },
   { key: 'others', label: 'Others', image: '/hero.png' },
 ];
 
