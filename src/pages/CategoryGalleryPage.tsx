@@ -1,6 +1,9 @@
 import { Link, useParams } from 'react-router-dom';
 import { ImageGallery } from '@/components/ImageGallery';
-import { SERVICE_GALLERIES, SERVICE_META, type ServiceSlug } from '@/data/gallery';
+import { SERVICE_META, type ServiceSlug } from '@/data/gallery';
+import { useAdmin } from '@/hooks/useAdmin';
+import { useGallery } from '@/hooks/useGallery';
+import { CloudinaryUpload } from '@/components/CloudinaryUpload';
 
 const SLUGS: ServiceSlug[] = ['baby', 'wedding', 'maternity'];
 
@@ -8,7 +11,9 @@ export function CategoryGalleryPage() {
   const { slug } = useParams<{ slug: string }>();
   const validSlug = SLUGS.includes(slug as ServiceSlug) ? (slug as ServiceSlug) : 'wedding';
   const meta = SERVICE_META[validSlug];
-  const images = SERVICE_GALLERIES[validSlug];
+  
+  const { isAdmin } = useAdmin();
+  const { images, addImages, removeImage } = useGallery(validSlug);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white">
@@ -29,7 +34,13 @@ export function CategoryGalleryPage() {
         <p className="mx-auto max-w-2xl text-sm leading-relaxed text-zinc-500">{meta.description}</p>
       </div>
 
-      <ImageGallery images={images} />
+      {isAdmin && (
+        <div className="mx-auto mt-4 max-w-lg px-4">
+          <CloudinaryUpload onUploadSuccess={addImages} />
+        </div>
+      )}
+
+      <ImageGallery images={images} isAdmin={isAdmin} onDelete={removeImage} />
     </div>
   );
 }

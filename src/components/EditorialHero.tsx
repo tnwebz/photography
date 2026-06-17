@@ -1,5 +1,7 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { Shield, Menu, X } from 'lucide-react';
+import { useAdmin } from '@/hooks/useAdmin';
 
 const CAROUSEL_IMAGES = [
   { src: '/h1.png', alt: 'Wedding portrait 1' },
@@ -149,8 +151,129 @@ function ScaledImageGallery() {
   );
 }
 
+/* ── Shield Admin Gate ── */
+function ShieldAdminButton({ className }: { className?: string }) {
+  const { isAdmin, login, logout } = useAdmin();
+  const clickCountRef = useRef(0);
+  const timerRef = useRef<number | null>(null);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [password, setPassword] = useState('');
+
+  const handleShieldClick = useCallback(() => {
+    if (isAdmin) {
+      logout();
+      return;
+    }
+
+    clickCountRef.current += 1;
+
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+    }
+
+    if (clickCountRef.current >= 3) {
+      clickCountRef.current = 0;
+      setShowPasswordInput(true);
+    } else {
+      timerRef.current = window.setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 1500);
+    }
+  }, [isAdmin, logout]);
+
+  const handlePasswordSubmit = () => {
+    const success = login(password);
+    if (success) {
+      setShowPasswordInput(false);
+      setPassword('');
+    } else {
+      alert('Wrong password!');
+      setPassword('');
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleShieldClick}
+        className={`group relative transition-all ${className ?? ''}`}
+        title={isAdmin ? 'Admin active — click to logout' : ''}
+      >
+        <Shield
+          className={`h-4 w-4 transition-colors ${
+            isAdmin ? 'text-orange-500' : 'text-zinc-400 hover:text-zinc-600'
+          }`}
+        />
+        {isAdmin && (
+          <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-orange-500" />
+        )}
+      </button>
+
+      {/* Password modal */}
+      <AnimatePresence>
+        {showPasswordInput && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setShowPasswordInput(false);
+              setPassword('');
+            }}
+          >
+            <motion.div
+              className="mx-4 w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-6 flex items-center gap-3">
+                <Shield className="h-5 w-5 text-orange-500" />
+                <h3 className="font-serif text-lg text-black">Admin Access</h3>
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                placeholder="Enter password"
+                className="w-full rounded-lg border border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-black placeholder:text-zinc-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                autoFocus
+              />
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordInput(false);
+                    setPassword('');
+                  }}
+                  className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-600 transition-colors hover:bg-zinc-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePasswordSubmit}
+                  className="flex-1 rounded-lg bg-orange-500 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-orange-600"
+                >
+                  Unlock
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
 export function EditorialHero() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsLargeScreen(window.innerWidth >= 1024);
@@ -180,23 +303,75 @@ export function EditorialHero() {
       <div className="relative z-10 flex min-h-[100dvh] flex-col px-4 py-5 sm:px-8 sm:py-6 lg:px-14">
         <header className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <a href="/" className="text-[10px] font-medium uppercase tracking-[0.18em] text-black sm:text-xs sm:tracking-[0.2em]">
+            {/* Desktop: Shield icon top-left */}
+            <div className="hidden items-center gap-3 md:flex">
+              <ShieldAdminButton />
+              <a href="/" className="text-[10px] font-medium uppercase tracking-[0.18em] text-black sm:text-xs sm:tracking-[0.2em]">
+                Studio
+              </a>
+            </div>
+
+            {/* Mobile: Studio text only */}
+            <a href="/" className="text-[10px] font-medium uppercase tracking-[0.18em] text-black sm:text-xs sm:tracking-[0.2em] md:hidden">
               Studio
             </a>
+
+            {/* Desktop: Get in touch */}
             <a
               href="#contact"
-              className="shrink-0 border border-black px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.14em] text-black transition-colors hover:bg-black hover:text-white sm:px-5 sm:py-2 sm:text-xs sm:tracking-[0.18em]"
+              className="hidden shrink-0 border border-black px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.14em] text-black transition-colors hover:bg-black hover:text-white sm:px-5 sm:py-2 sm:text-xs sm:tracking-[0.18em] md:inline-block"
             >
               Get in touch
             </a>
+
+            {/* Mobile: Hamburger toggle */}
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white/60 backdrop-blur-sm md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 text-black" />
+              ) : (
+                <Menu className="h-5 w-5 text-black" />
+              )}
+            </button>
           </div>
-          <nav className="flex gap-4 overflow-x-auto pb-1 text-[10px] text-zinc-600 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
-            {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className="shrink-0 whitespace-nowrap hover:text-black">
-                {link.label}
-              </a>
-            ))}
-          </nav>
+
+          {/* Mobile slide-down menu */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.nav
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden md:hidden"
+              >
+                <div className="flex flex-col gap-1 rounded-xl border border-black/5 bg-white/80 px-5 py-4 backdrop-blur-md">
+                  {NAV_LINKS.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-black/5 hover:text-black"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                  {/* Shield icon — hidden admin trigger */}
+                  <div className="mt-2 border-t border-zinc-200 pt-3">
+                    <div className="flex items-center gap-2 px-3">
+                      <ShieldAdminButton />
+                    </div>
+                  </div>
+                </div>
+              </motion.nav>
+            )}
+          </AnimatePresence>
+
+          {/* Desktop nav */}
           <nav className="hidden items-center justify-center gap-8 text-xs text-zinc-600 md:flex">
             {NAV_LINKS.map((link) => (
               <a key={link.href} href={link.href} className="transition-colors hover:text-black">

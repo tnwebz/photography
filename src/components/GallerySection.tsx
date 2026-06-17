@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUpRight, X } from 'lucide-react';
 import { ImageGallery } from '@/components/ImageGallery';
-import { CATEGORY_GALLERIES, type GalleryCategory } from '@/data/gallery';
+import { type GalleryCategory } from '@/data/gallery';
+import { useAdmin } from '@/hooks/useAdmin';
+import { useGallery } from '@/hooks/useGallery';
+import { CloudinaryUpload } from '@/components/CloudinaryUpload';
 
 const CATEGORIES: Array<{ key: GalleryCategory; label: string; image: string }> = [
   { key: 'outdoor', label: 'Outdoor', image: '/p1.png' },
@@ -10,6 +13,34 @@ const CATEGORIES: Array<{ key: GalleryCategory; label: string; image: string }> 
   { key: 'events', label: 'Events', image: '/p3.png' },
   { key: 'others', label: 'Others', image: '/hero.png' },
 ];
+
+function ExpandedGalleryView({ category, onClose, label }: { category: GalleryCategory, onClose: () => void, label: string | undefined }) {
+  const { isAdmin } = useAdmin();
+  const { images, addImages, removeImage } = useGallery(category);
+
+  return (
+    <div className="mt-10 border-t border-zinc-200 pt-10">
+      <div className="mb-8 flex items-center justify-between">
+        <h3 className="font-serif text-2xl text-black sm:text-3xl">{label} Gallery</h3>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-black"
+        >
+          Close
+        </button>
+      </div>
+      
+      {isAdmin && (
+        <div className="mb-8 max-w-lg">
+          <CloudinaryUpload onUploadSuccess={addImages} />
+        </div>
+      )}
+
+      <ImageGallery images={images} embedded isAdmin={isAdmin} onDelete={removeImage} />
+    </div>
+  );
+}
 
 export function GallerySection() {
   const [expanded, setExpanded] = useState<GalleryCategory | null>(null);
@@ -23,7 +54,7 @@ export function GallerySection() {
   return (
     <section
       id="gallery"
-      className="relative z-20 rounded-t-2xl bg-zinc-50 px-4 pb-16 pt-12 sm:-mt-[22vh] sm:rounded-t-[2rem] sm:px-8 sm:pb-20 sm:pt-16 sm:shadow-[0_-24px_48px_rgba(0,0,0,0.12)] lg:-mt-[32vh] lg:px-14 lg:pt-20"
+      className="relative z-20 -mt-[12vh] rounded-t-2xl bg-zinc-50 px-4 pb-16 pt-12 shadow-[0_-16px_40px_rgba(0,0,0,0.1)] sm:-mt-[22vh] sm:rounded-t-[2rem] sm:px-8 sm:pb-20 sm:pt-16 sm:shadow-[0_-24px_48px_rgba(0,0,0,0.12)] lg:-mt-[32vh] lg:px-14 lg:pt-20"
     >
       <div className="mx-auto max-w-7xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Portfolio</p>
@@ -83,19 +114,11 @@ export function GallerySection() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="mt-10 border-t border-zinc-200 pt-10">
-                <div className="mb-8 flex items-center justify-between">
-                  <h3 className="font-serif text-2xl text-black sm:text-3xl">{activeLabel} Gallery</h3>
-                  <button
-                    type="button"
-                    onClick={() => setExpanded(null)}
-                    className="text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-black"
-                  >
-                    Close
-                  </button>
-                </div>
-                <ImageGallery images={CATEGORY_GALLERIES[expanded]} embedded />
-              </div>
+              <ExpandedGalleryView 
+                category={expanded} 
+                label={activeLabel} 
+                onClose={() => setExpanded(null)} 
+              />
             </motion.div>
           )}
         </AnimatePresence>
