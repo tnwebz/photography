@@ -1,33 +1,35 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const defaultSocialLinks = [
-  { id: '1', name: 'Instagram', href: 'https://instagram.com' },
-  { id: '2', name: 'Behance', href: 'https://behance.net' },
+  { id: "1", name: "Instagram", href: "https://instagram.com" },
+  { id: "2", name: "Behance", href: "https://behance.net" },
 ];
 
 const projectTypeOptions = [
-  'Wedding Photography',
-  'Baby Photoshoot',
-  'Maternity Session',
-  'Outdoor Portraits',
-  'Events',
-  'Other',
+  "Wedding Photography",
+  "Baby Photoshoot",
+  "Maternity Session",
+  "Outdoor Portraits",
+  "Events",
+  "Other",
 ];
 
 export function ContactSection() {
   const [formData, setFormData] = React.useState({
-    name: '',
-    email: '',
-    message: '',
+    name: "",
+    email: "",
+    message: "",
     projectType: [] as string[],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -43,12 +45,20 @@ export function ContactSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thank you! We will get back to you soon.');
-    setFormData({ name: '', email: '', message: '', projectType: [] });
+    const { name, email, message, projectType } = formData;
+    const text = `Hi, I am ${name}.\nEmail: ${email}\nLooking for: ${projectType.join(', ') || 'General Enquiry'}\n\nMessage: ${message}`;
+    const encodedText = encodeURIComponent(text);
+    const whatsappUrl = `https://wa.me/919841141813?text=${encodedText}`;
+    
+    window.open(whatsappUrl, '_blank');
+    setFormData({ name: "", email: "", message: "", projectType: [] });
   };
 
   return (
-    <section id="contact" className="relative min-h-screen w-full overflow-hidden">
+    <section
+      id="contact"
+      className="relative min-h-screen w-full overflow-hidden"
+    >
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/hero.png')" }}
@@ -77,16 +87,23 @@ export function ContactSection() {
           <h2 className="max-w-lg font-serif text-[clamp(1.75rem,6vw,3.75rem)] leading-tight text-white drop-shadow-lg">
             We can turn your dream moments into timeless photographs
           </h2>
-          <p className="mt-3 text-base text-white/80 sm:mt-4 sm:text-lg">Let&apos;s talk!</p>
+          <p className="mt-3 text-base text-white/80 sm:mt-4 sm:text-lg">
+            Let&apos;s talk!
+          </p>
         </div>
 
         <div className="rounded-lg border border-white/20 bg-white/95 p-5 shadow-xl sm:p-6 md:p-8">
-          <h3 className="text-xl font-bold text-black sm:text-2xl">Get in touch</h3>
+          <h3 className="text-xl font-bold text-black sm:text-2xl">
+            Get in touch
+          </h3>
 
           <div className="mt-6">
             <p className="mb-1 text-sm text-zinc-500">Mail us at</p>
-            <a href="mailto:hello@studio.com" className="font-medium text-black hover:underline">
-              hello@studio.com
+            <a
+              href="mailto:sathyastudio2003@.com"
+              className="font-medium text-black hover:underline"
+            >
+              sathyastudio2003@.com
             </a>
             <div className="mt-4 flex items-center gap-3">
               <span className="text-sm text-zinc-500">OR</span>
@@ -107,7 +124,13 @@ export function ContactSection() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Your name</Label>
-                <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -142,7 +165,9 @@ export function ContactSection() {
                     <Checkbox
                       id={option}
                       checked={formData.projectType.includes(option)}
-                      onCheckedChange={(checked) => handleCheckboxChange(option, checked)}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(option, checked)
+                      }
                     />
                     <Label htmlFor={option} className="text-xs font-normal">
                       {option}

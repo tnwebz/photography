@@ -9,7 +9,7 @@ export function StoryCTASection() {
     offset: ['start start', 'end end'],
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '-30%']);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%']);
   const textOpacity = useTransform(scrollYProgress, [0, 0.55, 0.9], [1, 1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%']);
 

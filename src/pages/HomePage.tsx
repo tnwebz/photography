@@ -5,6 +5,7 @@ import { GallerySection } from '@/components/GallerySection';
 import { ServicesSection } from '@/components/ServicesSection';
 import { StoryCTASection } from '@/components/StoryCTASection';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
+import { Footer } from '@/components/Footer';
 
 export function HomePage() {
   return (
@@ -16,6 +17,7 @@ export function HomePage() {
       <GallerySection />
       <TestimonialsSection />
       <ContactSection />
+      <Footer />
     </>
   );
 }
