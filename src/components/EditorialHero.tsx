@@ -3,17 +3,14 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Shield, Menu, X } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 
-const CAROUSEL_IMAGES = [
-  { src: "/h1.png", alt: "Wedding portrait 1" },
-  { src: "/h2.png", alt: "Wedding portrait 2" },
-  { src: "/h3.png", alt: "Wedding portrait 3" },
-] as const;
+// 11 hero slideshow images (desktop) and 10 mobile images
+const HERO_SLIDES = Array.from({ length: 11 }, (_, i) => ({
+  desktopSrc: `/her1 (${i + 1}).jpeg`,
+  mobileSrc: `/mer (${(i % 10) + 1}).png`,
+  alt: `Photography showcase ${i + 1}`,
+}));
 
-const IMAGE_SIZES = [
-  "h-[200px] w-[118px] sm:h-[300px] sm:w-[175px] lg:h-[420px] lg:w-[250px]",
-  "h-[158px] w-[92px] sm:h-[240px] sm:w-[138px] lg:h-[330px] lg:w-[190px]",
-  "h-[122px] w-[72px] sm:h-[188px] sm:w-[108px] lg:h-[260px] lg:w-[145px]",
-] as const;
+const SLIDE_DURATION = 5000; // 5 seconds per slide
 
 const SUBTEXT =
   "There is no such thing as a perfect love story or a perfect wedding.  For exactly this reason, we love doing what we do.";
@@ -112,44 +109,7 @@ function TypewriterBlock() {
   );
 }
 
-function ScaledImageGallery() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  return (
-    <div className="flex w-full max-w-full items-end justify-center gap-2 sm:items-center sm:gap-3 md:gap-4 lg:gap-5">
-      {CAROUSEL_IMAGES.map((image, index) => (
-        <motion.button
-          key={image.src}
-          type="button"
-          onClick={() => setActiveIndex(index)}
-          className={`relative shrink-0 overflow-hidden transition-shadow ${IMAGE_SIZES[index]} ${
-            activeIndex === index
-              ? "ring-2 ring-black/30 ring-offset-1 ring-offset-transparent sm:ring-offset-2"
-              : "ring-1 ring-black/10"
-          }`}
-          initial={{ x: 60, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{
-            duration: 0.7,
-            delay: index * 0.15,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          aria-label={`View ${image.alt}`}
-          aria-pressed={activeIndex === index}
-        >
-          <img
-            src={image.src}
-            alt={image.alt}
-            className="h-full w-full object-cover"
-            draggable={false}
-          />
-        </motion.button>
-      ))}
-    </div>
-  );
-}
+// No ScaledImageGallery needed — hero background now auto-slides
 
 /* ── Shield Admin Gate ── */
 function ShieldAdminButton({ className }: { className?: string }) {
@@ -272,14 +232,15 @@ function ShieldAdminButton({ className }: { className?: string }) {
 }
 
 export function EditorialHero() {
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Auto-advance slideshow
   useEffect(() => {
-    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1024);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const timer = window.setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, SLIDE_DURATION);
+    return () => window.clearInterval(timer);
   }, []);
 
   const today = new Date().toLocaleDateString("en-GB", {
@@ -289,61 +250,95 @@ export function EditorialHero() {
   });
 
   return (
-    <section
-      className="relative min-h-[100dvh] overflow-hidden"
-      style={{
-        backgroundImage: "url('/hero.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: isLargeScreen ? "fixed" : "scroll",
-      }}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 bg-white/5"
-        aria-hidden="true"
-      />
+    <section className="relative min-h-[100dvh] overflow-hidden">
+      {/* ── Auto-sliding Background Carousel ── */}
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={currentSlide}
+          className="absolute inset-0 z-0"
+          initial={{ opacity: 0, scale: 1.08 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Mobile Image */}
+          <img
+            src={HERO_SLIDES[currentSlide].mobileSrc}
+            alt={HERO_SLIDES[currentSlide].alt}
+            className="block h-full w-full object-cover object-center sm:hidden"
+            draggable={false}
+          />
+          {/* Desktop Image */}
+          <img
+            src={HERO_SLIDES[currentSlide].desktopSrc}
+            alt={HERO_SLIDES[currentSlide].alt}
+            className="hidden h-full w-full object-cover object-center sm:block"
+            draggable={false}
+          />
+        </motion.div>
+      </AnimatePresence>
 
-      <div className="relative z-10 flex min-h-[100dvh] flex-col px-4 py-5 sm:px-8 sm:py-6 lg:px-14">
-        <header className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            {/* Desktop: Shield icon top-left */}
-            <div className="hidden items-center gap-3 md:flex">
-              <ShieldAdminButton />
-              <a
-                href="/"
-                className="text-[10px] font-medium uppercase tracking-[0.18em] text-white sm:text-xs sm:tracking-[0.2em]"
-              >
-                Studio
+      {/* Dark overlay for text readability */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-black/45" aria-hidden="true" />
+
+      <div className="relative z-10 flex min-h-[100dvh] flex-col">
+        {/* ── Sticky White Navbar ── */}
+        <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/95 shadow-sm backdrop-blur-lg">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-8 sm:py-2 lg:px-14">
+            <div className="flex items-center gap-3">
+              {/* Shield — left corner, desktop only */}
+              <div className="hidden md:block">
+                <ShieldAdminButton />
+              </div>
+              {/* Brand: Logo & Text */}
+              <a href="/" className="flex items-center shrink-0">
+              <img
+                src="/logo.png"
+                alt="Sathya Studio's Logo"
+                className="h-10 sm:h-10 w-auto object-contain mix-blend-multiply scale-[1.4] sm:scale-[2.0] origin-left"
+                draggable={false}
+              />
+              {/* Mobile-only styled red text */}
+              <span className="ml-6 font-serif text-lg font-extrabold tracking-wide text-red-600 drop-shadow-sm sm:hidden">
+                sathya studios
+              </span>
               </a>
             </div>
 
-            {/* Mobile: Studio text only */}
-            <a
-              href="/"
-              className="text-[10px] font-medium uppercase tracking-[0.18em] text-white sm:text-xs sm:tracking-[0.2em] md:hidden"
-            >
-              Studio
-            </a>
+            {/* Desktop nav links — centered */}
+            <nav className="hidden items-center gap-8 text-xs font-medium uppercase tracking-[0.15em] text-zinc-600 md:flex">
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="transition-colors hover:text-black"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
             {/* Desktop: Get in touch */}
-            <a
-              href="#contact"
-              className="hidden shrink-0 border border-white px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.14em] text-white transition-colors hover:bg-white hover:text-black sm:px-5 sm:py-2 sm:text-xs sm:tracking-[0.18em] md:inline-block"
-            >
-              Get in touch
-            </a>
+            <div className="hidden items-center gap-3 md:flex">
+              <a
+                href="#contact"
+                className="shrink-0 rounded-full bg-black px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-white transition-all hover:bg-zinc-800 sm:text-xs"
+              >
+                Get in touch
+              </a>
+            </div>
 
             {/* Mobile: Hamburger toggle */}
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-white/20 bg-black/20 backdrop-blur-sm md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
               {mobileMenuOpen ? (
-                <X className="h-5 w-5 text-white" />
+                <X className="h-5 w-5 text-zinc-700" />
               ) : (
-                <Menu className="h-5 w-5 text-white" />
+                <Menu className="h-5 w-5 text-zinc-700" />
               )}
             </button>
           </div>
@@ -356,19 +351,26 @@ export function EditorialHero() {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="overflow-hidden md:hidden"
+                className="overflow-hidden border-t border-zinc-100 bg-white/98 backdrop-blur-lg md:hidden"
               >
-                <div className="flex flex-col gap-1 rounded-xl border border-black/5 bg-white/80 px-5 py-4 backdrop-blur-md">
+                <div className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4">
                   {NAV_LINKS.map((link) => (
                     <a
                       key={link.href}
                       href={link.href}
-                      className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-black/5 hover:text-black"
+                      className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-black"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.label}
                     </a>
                   ))}
+                  <a
+                    href="#contact"
+                    className="mt-2 rounded-full bg-black px-5 py-2.5 text-center text-xs font-semibold uppercase tracking-wider text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Get in touch
+                  </a>
                   {/* Shield icon — hidden admin trigger */}
                   <div className="mt-2 border-t border-zinc-200 pt-3">
                     <div className="flex items-center gap-2 px-3">
@@ -379,54 +381,55 @@ export function EditorialHero() {
               </motion.nav>
             )}
           </AnimatePresence>
-
-          {/* Desktop nav */}
-          <nav className="hidden items-center justify-center gap-8 text-xs text-zinc-300 md:flex">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
         </header>
 
-        <div className="flex flex-1 flex-col gap-8 py-6 sm:gap-10 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:py-16">
-          <div className="flex w-full flex-col justify-center lg:max-w-[48%]">
+        <div className="flex flex-1 flex-col justify-center gap-8 px-4 py-12 sm:gap-10 sm:px-8 sm:py-16 lg:px-14 lg:py-24">
+          <div className="mx-auto w-full max-w-7xl">
             <CaptureYourHeadline />
             <TypewriterBlock />
           </div>
-
-          <div className="flex w-full flex-1 items-center justify-center lg:justify-end">
-            <ScaledImageGallery />
-          </div>
         </div>
 
-        <footer className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-          <div className="text-[10px] leading-relaxed text-zinc-400 sm:text-[11px]">
-            <p>{today}</p>
-            <p className="mt-1 text-white">Creative direction</p>
+        <footer className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-6 sm:px-8 lg:px-14">
+          {/* Slide indicators */}
+          <div className="flex items-center justify-center gap-2">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className={`h-1 rounded-full transition-all duration-500 ${
+                  i === currentSlide
+                    ? "w-8 bg-white"
+                    : "w-3 bg-white/40 hover:bg-white/60"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
           </div>
-          <div className="flex gap-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white sm:gap-6 sm:text-[11px] sm:tracking-[0.15em]">
-            <a
-              href="https://behance.net"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:opacity-60"
-            >
-              Behance
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:opacity-60"
-            >
-              Instagram
-            </a>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+            <div className="text-[10px] leading-relaxed text-zinc-400 sm:text-[11px]">
+              <p>{today}</p>
+              <p className="mt-1 text-white">Creative direction</p>
+            </div>
+            <div className="flex gap-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white sm:gap-6 sm:text-[11px] sm:tracking-[0.15em]">
+              <a
+                href="https://www.facebook.com/share/1BFHcGftHD/"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:opacity-60"
+              >
+                Facebook
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:opacity-60"
+              >
+                Instagram
+              </a>
+            </div>
           </div>
         </footer>
       </div>

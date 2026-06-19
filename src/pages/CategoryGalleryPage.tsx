@@ -5,11 +5,15 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useGallery } from '@/hooks/useGallery';
 import { CloudinaryUpload } from '@/components/CloudinaryUpload';
 
-const SLUGS: ServiceSlug[] = ['baby', 'wedding', 'maternity'];
+const SLUGS: ServiceSlug[] = [
+  'birthday', 'hindu_wedding', 'christian_wedding', 'bhramin_wedding',
+  'engagement', 'housewarming', 'puberty', 'sastiyathapoorthi',
+  'upanayanam', 'maternity',
+];
 
 export function CategoryGalleryPage() {
   const { slug } = useParams<{ slug: string }>();
-  const validSlug = SLUGS.includes(slug as ServiceSlug) ? (slug as ServiceSlug) : 'wedding';
+  const validSlug = SLUGS.includes(slug as ServiceSlug) ? (slug as ServiceSlug) : 'hindu_wedding';
   const meta = SERVICE_META[validSlug];
   
   const { isAdmin } = useAdmin();

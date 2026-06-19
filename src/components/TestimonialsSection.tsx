@@ -1,45 +1,24 @@
 import { motion } from 'framer-motion';
 
-const testimonials = [
-  {
-    text: 'They captured our wedding with so much heart. Every photo feels alive and honest — we could not have asked for more.',
-    image: 'https://i.pravatar.cc/150?img=32',
-    name: 'Priya & Arjun',
-    role: 'Wedding clients',
-  },
-  {
-    text: 'Our baby shoot was gentle, patient, and beautiful. The team made us feel completely at ease from start to finish.',
-    image: 'https://i.pravatar.cc/150?img=45',
-    name: 'Meera Shah',
-    role: 'New parent',
-  },
-  {
-    text: 'The maternity portraits are stunning — elegant, warm, and deeply personal. A treasure we will keep forever.',
-    image: 'https://i.pravatar.cc/150?img=20',
-    name: 'Ananya R.',
-    role: 'Maternity session',
-  },
-  {
-    text: 'Professional, creative, and wonderfully calm on a busy day. Our families still talk about how natural every shot looks.',
-    image: 'https://i.pravatar.cc/150?img=12',
-    name: 'Rahul & Divya',
-    role: 'Event photography',
-  },
-  {
-    text: 'From the first call to final delivery, everything felt thoughtful. The gallery exceeded every expectation we had.',
-    image: 'https://i.pravatar.cc/150?img=28',
-    name: 'Kavya M.',
-    role: 'Portrait client',
-  },
-];
+// 21 real review screenshots – served from /public
+const REVIEWS = Array.from({ length: 21 }, (_, i) => ({
+  id: i + 1,
+  src: `/t (${i + 1}).png`,
+  alt: `Customer review ${i + 1}`,
+}));
 
-type TestimonialsColumnProps = {
+// Split reviews into 3 balanced columns
+const col1 = REVIEWS.filter((_, i) => i % 3 === 0); // 1,4,7,10,13,16,19
+const col2 = REVIEWS.filter((_, i) => i % 3 === 1); // 2,5,8,11,14,17,20
+const col3 = REVIEWS.filter((_, i) => i % 3 === 2); // 3,6,9,12,15,18,21
+
+type ReviewColumnProps = {
   className?: string;
-  testimonials: typeof testimonials;
+  reviews: typeof REVIEWS;
   duration?: number;
 };
 
-function TestimonialsColumn({ className, testimonials: items, duration = 12 }: TestimonialsColumnProps) {
+function ReviewColumn({ className, reviews, duration = 18 }: ReviewColumnProps) {
   return (
     <div className={className}>
       <motion.div
@@ -50,23 +29,23 @@ function TestimonialsColumn({ className, testimonials: items, duration = 12 }: T
           ease: 'linear',
           repeatType: 'loop',
         }}
-        className="flex flex-col gap-6 pb-6"
+        className="flex flex-col gap-5 pb-5"
       >
+        {/* Duplicate the list for seamless infinite scroll */}
         {[0, 1].map((loop) => (
-          <div key={loop} className="flex flex-col gap-6">
-            {items.map(({ text, image, name, role }, i) => (
+          <div key={loop} className="flex flex-col gap-5">
+            {reviews.map((review) => (
               <div
-                key={`${loop}-${i}`}
-                className="w-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-lg shadow-black/5 sm:p-8"
+                key={`${loop}-${review.id}`}
+                className="w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg shadow-black/5"
               >
-                <p className="text-sm leading-relaxed text-zinc-600">{text}</p>
-                <div className="mt-5 flex items-center gap-3">
-                  <img src={image} alt={name} className="h-10 w-10 rounded-full object-cover" />
-                  <div>
-                    <p className="font-medium leading-tight text-black">{name}</p>
-                    <p className="text-sm text-zinc-500">{role}</p>
-                  </div>
-                </div>
+                <img
+                  src={review.src}
+                  alt={review.alt}
+                  className="h-auto w-full object-cover"
+                  loading="lazy"
+                  draggable={false}
+                />
               </div>
             ))}
           </div>
@@ -77,10 +56,6 @@ function TestimonialsColumn({ className, testimonials: items, duration = 12 }: T
 }
 
 export function TestimonialsSection() {
-  const firstCol = testimonials.slice(0, 2);
-  const secondCol = testimonials.slice(2, 4);
-  const thirdCol = testimonials.slice(4);
-
   return (
     <section id="reviews" className="overflow-hidden bg-white px-4 py-16 sm:px-8 sm:py-20 lg:px-14">
       <div className="mx-auto max-w-7xl">
@@ -89,14 +64,32 @@ export function TestimonialsSection() {
           Kind words from couples and families we have had the honour to photograph.
         </p>
 
-        <div className="relative mt-8 flex h-[420px] justify-center gap-4 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] sm:mt-12 sm:h-[520px] sm:gap-6">
-          <TestimonialsColumn testimonials={firstCol} duration={14} className="w-full max-w-[320px] sm:max-w-xs" />
-          <TestimonialsColumn testimonials={secondCol} className="hidden w-full max-w-xs md:block" duration={16} />
-          <TestimonialsColumn
-            testimonials={thirdCol.length ? thirdCol : firstCol}
-            className="hidden w-full max-w-xs lg:block"
-            duration={18}
-          />
+        <div
+          className="relative mt-8 flex h-[480px] justify-center gap-5 overflow-hidden sm:mt-12 sm:h-[580px] sm:gap-6"
+          style={{
+            maskImage: 'linear-gradient(to bottom, transparent, black 8%, black 92%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 8%, black 92%, transparent)',
+          }}
+        >
+          <ReviewColumn reviews={col1} duration={22} className="w-full max-w-[320px] sm:max-w-xs" />
+          <ReviewColumn reviews={col2} className="hidden w-full max-w-xs md:block" duration={26} />
+          <ReviewColumn reviews={col3} className="hidden w-full max-w-xs lg:block" duration={20} />
+        </div>
+
+        {/* Review Us CTA */}
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <p className="text-sm text-zinc-500">Loved our work? We'd love to hear from you!</p>
+          <a
+            href="https://g.page/r/CZUCWGJE9itkEAE/review"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-orange-500/25 transition-all hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/30"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Review Us on Google
+          </a>
         </div>
       </div>
     </section>

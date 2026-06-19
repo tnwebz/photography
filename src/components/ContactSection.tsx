@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const defaultSocialLinks = [
   { id: "1", name: "Instagram", href: "https://instagram.com" },
-  { id: "2", name: "Behance", href: "https://behance.net" },
+  { id: "2", name: "Facebook", href: "https://www.facebook.com/share/1BFHcGftHD/" },
 ];
 
 const projectTypeOptions = [
