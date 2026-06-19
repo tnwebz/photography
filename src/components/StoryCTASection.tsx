@@ -1,24 +1,30 @@
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export function StoryCTASection() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ['start start', 'end end'],
+    offset: ["start start", "end end"],
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '-15%']);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.55, 0.9], [1, 1, 0]);
-  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%']);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-12%"]);
 
   return (
-    <div ref={containerRef} className="relative h-[125vh] sm:h-[145vh] lg:h-[160vh]">
+    <div
+      ref={containerRef}
+      className="relative h-[125vh] sm:h-[145vh] lg:h-[160vh]"
+    >
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden">
-        <motion.div className="absolute inset-0 h-[130%] w-full -top-[15%]" style={{ y: backgroundY }}>
+        <motion.div
+          className="absolute inset-0 h-[130%] w-full -top-[15%]"
+          style={{ y: backgroundY }}
+        >
           <img
-            src="/n1.png"
+            src="/n1.jpeg"
             alt=""
             className="h-full w-full object-cover object-[center_30%] sm:object-center"
             draggable={false}
