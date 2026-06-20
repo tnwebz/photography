@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, arrayRemove, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export function useGallery(category: string) {
