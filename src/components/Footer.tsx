@@ -87,8 +87,18 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-zinc-500">
-        &copy; {new Date().getFullYear()} sathyastudio's. All rights reserved.
+      <div className="mt-8 border-t border-white/10 pt-6 flex flex-col items-center gap-2">
+        <div className="text-xs text-zinc-500">
+          &copy; {new Date().getFullYear()} sathyastudio's. All rights reserved.
+        </div>
+        <a 
+          href="https://tnwebz.com" 
+          target="_blank" 
+          rel="noopener" 
+          className="text-xs text-gray-500 opacity-60 hover:opacity-100 transition-opacity"
+        >
+          Designed by TNWebz
+        </a>
       </div>
     </footer>
   );
