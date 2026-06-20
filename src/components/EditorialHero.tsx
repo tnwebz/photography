@@ -3,12 +3,17 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Shield, Menu, X } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 
-// 11 hero slideshow images (desktop) and 10 mobile images
-const HERO_SLIDES = Array.from({ length: 11 }, (_, i) => ({
-  desktopSrc: `/her1 (${i + 1}).jpeg`,
-  mobileSrc: `/mer (${(i % 10) + 1}).png`,
-  alt: `Photography showcase ${i + 1}`,
-}));
+const desktopImages = [1, 2, 4, 7, 8, 9, 10];
+const mobileImages = [1, 2, 6, 7, 8, 10];
+
+const HERO_SLIDES = desktopImages.map((dNum, i) => {
+  const mNum = mobileImages[i % mobileImages.length];
+  return {
+    desktopSrc: `/her1 (${dNum}).jpeg`,
+    mobileSrc: `/mer (${mNum}).png`,
+    alt: `Photography showcase ${i + 1}`,
+  };
+});
 
 const SLIDE_DURATION = 5000; // 5 seconds per slide
 
