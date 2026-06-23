@@ -9,7 +9,7 @@ const mobileImages = [1, 2, 7, 8];
 const HERO_SLIDES = desktopImages.map((dNum, i) => {
   const mNum = mobileImages[i % mobileImages.length];
   return {
-    desktopSrc: `/her1 (${dNum}).jpeg`,
+    desktopSrc: `/her1 (${dNum}).${dNum === 2 ? "png" : "jpeg"}`,
     mobileSrc: `/mer (${mNum}).png`,
     alt: `Photography showcase ${i + 1}`,
   };
