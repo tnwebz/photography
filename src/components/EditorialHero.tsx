@@ -3,8 +3,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { Shield, Menu, X } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
 
-const desktopImages = [1, 2, 4, 7, 8, 9, 10];
-const mobileImages = [1, 2, 6, 7, 8, 10];
+const desktopImages = [1, 2, 7, 10];
+const mobileImages = [1, 2, 7, 8];
 
 const HERO_SLIDES = desktopImages.map((dNum, i) => {
   const mNum = mobileImages[i % mobileImages.length];
