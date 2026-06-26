@@ -37,7 +37,7 @@ export function ImageGallery({ images, embedded = false, isAdmin, onDelete }: Im
 
             return (
               <div key={`${index}-${src}`} className="relative break-inside-avoid">
-                <AnimatedImage alt={`Gallery ${index}`} src={src} ratio={ratio} onClick={() => setSelectedImage(src)} />
+                <AnimatedImage alt={`Gallery ${index}`} src={src} ratio={ratio} onClick={() => setSelectedImage(src)} priority={index === 0} />
                 {isAdmin && onDelete && (
                   <button
                     onClick={() => {
@@ -101,9 +101,10 @@ type AnimatedImageProps = {
   src: string;
   ratio: number;
   onClick: () => void;
+  priority?: boolean;
 };
 
-function AnimatedImage({ alt, src, ratio, onClick }: AnimatedImageProps) {
+function AnimatedImage({ alt, src, ratio, onClick, priority }: AnimatedImageProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const [isLoading, setIsLoading] = React.useState(true);
@@ -115,7 +116,7 @@ function AnimatedImage({ alt, src, ratio, onClick }: AnimatedImageProps) {
       onClick={onClick}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <AspectRatio ref={ref} ratio={ratio} className="relative size-full rounded-lg border border-zinc-200 bg-zinc-100 overflow-hidden">
+      <AspectRatio ref={ref} ratio={ratio} className={cn("relative size-full rounded-lg border border-zinc-200 bg-zinc-100 overflow-hidden", isLoading && "animate-pulse")}>
         <img
           alt={alt}
           src={imgSrc}
@@ -124,7 +125,9 @@ function AnimatedImage({ alt, src, ratio, onClick }: AnimatedImageProps) {
             isInView && !isLoading && 'opacity-100',
           )}
           onLoad={() => setIsLoading(false)}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding={priority ? 'auto' : 'async'}
           onError={() => setImgSrc('/hero.png')}
           draggable={false}
         />

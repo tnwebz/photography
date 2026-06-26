@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import imageCompression from 'browser-image-compression';
 
 type CloudinaryUploadProps = {
   onUploadSuccess: (urls: string[]) => void;
@@ -19,19 +20,20 @@ export function CloudinaryUpload({ onUploadSuccess }: CloudinaryUploadProps) {
       return;
     }
 
-    const hasLargeFile = files.some((file) => file.size > 4 * 1024 * 1024);
-    if (hasLargeFile) {
-      alert('One or more files exceed the 4MB limit!');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-
     setUploading(true);
 
     try {
       const uploadPromises = files.map(async (file) => {
+        const options = {
+          maxSizeMB: 0.2,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+        };
+        
+        const compressedFile = await imageCompression(file, options);
+        
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressedFile);
         formData.append('upload_preset', 'ml_default');
 
         const response = await fetch('https://api.cloudinary.com/v1_1/dtsh613l2/image/upload', {
