@@ -4,7 +4,7 @@ export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const adminState = localStorage.getItem('isAdmin');
+    const adminState = sessionStorage.getItem('isAdmin');
     if (adminState === 'true') {
       setIsAdmin(true);
     }
@@ -12,7 +12,7 @@ export function useAdmin() {
 
   const login = (password: string) => {
     if (password === '111') {
-      localStorage.setItem('isAdmin', 'true');
+      sessionStorage.setItem('isAdmin', 'true');
       setIsAdmin(true);
       return true;
     }
@@ -20,7 +20,7 @@ export function useAdmin() {
   };
 
   const logout = () => {
-    localStorage.removeItem('isAdmin');
+    sessionStorage.removeItem('isAdmin');
     setIsAdmin(false);
   };
 
